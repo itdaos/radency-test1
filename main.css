@@ -1,0 +1,32 @@
+* {
+  padding: 0;
+  margin: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+#table-heading {
+  text-align: center;
+  margin-top: 25px;
+}
+
+#table-container {
+  border: 1px solid silver;
+}
+
+#table-container .row.header {
+  background-color: navajowhite;
+}
+
+html {
+  font-size: 16px;
+}
+
+p {
+  font-size: 1em;
+}
+
+h1 {
+  font-size: 1.5em;
+}
+/*# sourceMappingURL=main.css.map */
