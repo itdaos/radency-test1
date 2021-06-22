@@ -10,10 +10,25 @@
 }
 
 #table-container {
-    border: 1px solid silver;
 
-    .row.header {
-        background-color: navajowhite;
+    >* {
+        margin-bottom: 10px;
+    }
+
+    .row {
+
+        &.header {
+            background-color: navajowhite;
+            font-weight: bold;
+        }
+
+        &.item {
+            background-color: silver;
+        }
+
+        >* {
+            padding: 10px 0;
+        }
     }
 }
 

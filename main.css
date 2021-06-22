@@ -10,12 +10,21 @@
   margin-top: 25px;
 }
 
-#table-container {
-  border: 1px solid silver;
+#table-container > * {
+  margin-bottom: 10px;
 }
 
 #table-container .row.header {
   background-color: navajowhite;
+  font-weight: bold;
+}
+
+#table-container .row.item {
+  background-color: silver;
+}
+
+#table-container .row > * {
+  padding: 10px 0;
 }
 
 html {
