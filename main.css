@@ -8,6 +8,7 @@
 #table-heading {
   text-align: center;
   margin-top: 25px;
+  text-transform: uppercase;
 }
 
 #table-container > * {
@@ -15,24 +16,92 @@
 }
 
 #table-container .row.header {
-  background-color: navajowhite;
+  background-color: black;
   font-weight: bold;
+  color: #fff;
 }
 
 #table-container .row.item {
-  background-color: silver;
+  background-color: #ffc;
+  color: #333;
 }
 
 #table-container .row > * {
-  padding: 10px 0;
+  padding: 10px;
+  text-align: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+#table-container .row > * > img {
+  margin-right: 5px;
+  width: 30px;
+  height: auto;
+}
+
+#table-container .row .content {
+  text-align: justify;
+  text-indent: 25px;
+}
+
+#table-container .row .name,
+#table-container .row .category {
+  text-transform: capitalize;
+}
+
+#table-container .row .controls img {
+  cursor: pointer;
+}
+
+#table-container .row input,
+#table-container .row textarea {
+  padding: 5px;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+#table-container .row textarea,
+#table-container .row select {
+  width: 80%;
+}
+
+#add-btn,
+#form-submit {
+  border: none;
+  background-position: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  margin: auto;
+}
+
+#add-btn {
+  background-image: url("img/add.svg");
+}
+
+#form-submit {
+  background-image: url("img/ok.svg");
 }
 
 html {
   font-size: 16px;
+  padding: 40px 0;
 }
 
 p {
   font-size: 1em;
+  margin-bottom: 0;
 }
 
 h1 {
