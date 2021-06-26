@@ -58,6 +58,7 @@
 #table-container .row .name,
 #table-container .row .category {
   text-transform: capitalize;
+  padding: 10px;
 }
 
 #table-container .row .controls img {
@@ -84,6 +85,10 @@
   height: 50px;
   border-radius: 100%;
   margin: auto;
+}
+
+input {
+  max-width: 100%;
 }
 
 #add-btn {

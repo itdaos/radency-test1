@@ -88,6 +88,8 @@ const addNote = (note) => {
 }
 
 const createEditForm = (id) => {
+    // 1. create form with note data 
+    // 2. replace note div with form
     let idx = -1;
     for (let i = 0; i < notes.length; i++) {
         if (id === notes[i].id) {
@@ -97,12 +99,84 @@ const createEditForm = (id) => {
     }
 
     if (idx === -1) return;
+    let note = notes[id];
 
-    const domNote = document.querySelector(`#table-container .row:nth-child(${3 + idx})`);
     console.log(`Note with id = ${id} is being edited.`);
+    const domNote = document.querySelector(`#table-container .row:nth-child(${3 + idx})`);
+    let form = document.createElement("form");
+    form.id = "edit" + idx;
+    form.className = "row item";
+
+    form.innerHTML = `
+    <div class="col-2 name">
+        <input type="text" name="name" id="form-name" value="${note.name}">
+    </div>
+    <div class="col-1">${note.createdAt}</div>
+    <div class="col-2 category">
+        <select name="category" id="form-category" >
+            <option value="" ${ note.category == "" ? "selected" : "" }></option> 
+            <option value="random" ${ note.category == "random" ? "selected" : "" }>Random Thought</option>
+            <option value="idea"   ${ note.category == "idea" ? "selected" : "" }>Idea</option>
+            <option value="task"   ${ note.category == "task" ? "selected" : "" }>Task</option>
+        </select>
+    </div>
+    <div class="col-4 content">
+        <textarea name="content" id="form-content" cols="30" rows="10">${note.content.trim()}</textarea>  
+    </div>
+    <div class="col-1">${
+        note.dates.reduce(
+            (prev, cur) => {
+                return prev + "<br>" + cur
+            }, ""
+        )
+    }</div>
+    <div class="col-2 controls">
+        <input type="button" id="form-submit" onClick="editNote(${idx})">
+    </div>
+    `;
+    domNote.replaceWith(form);
+}
+
+const editNote = (idx) => {
+    // 1) find editable form with this index
+    // 2) replace form with data from this form
+
+    const form = document.querySelector(`#edit${idx}`);
+    const note = formDataToMap(new FormData(form));
+    const prev = notes[idx];
+    note.dates = prev.dates;
+    note.createdAt = prev.createdAt;
+    note.id = prev.id;
+    console.log(note);
+
+    const domNote = document.createElement("div");
+    domNote.className = "row item";
     domNote.innerHTML = `
-        
-    `
+    <div class="col-2 name">
+        <img src="img/${getImgName(note.category)}" alt="">
+        <p>${note.name}</p>
+    </div>
+    <div class="col-1">${note.createdAt}</div>
+    <div class="col-2 category">${
+        getCategoryName( note.category )
+    }</div>
+    <div class="col-4 content">${note.content}</div>
+    <div class="col-1">${
+        note.dates.reduce(
+            (prev, cur) => {
+                return prev + "<br>" + cur
+            }, ""
+        )
+    }</div>
+    <div class="col-2 controls">
+        <img src="img/edit.svg" alt="edit" onClick="createEditForm(${note.id})">
+        <img src="img/doc.svg" alt="archive" onClick="archiveNoteById(${note.id})">
+        <img src="img/delete.svg" alt="delete" onClick="deleteNoteById(${note.id})">
+    </div>
+    `;
+    form.replaceWith(domNote);
+    notes[idx] = {...note };
+
 }
 
 const archiveNoteById = (id) => {
