@@ -36,7 +36,7 @@ function getCategoryName(category) {
         case "idea":
             return "Idea";
         default:
-            return ""
+            return "";
     };
 }
 
@@ -51,16 +51,18 @@ function formDataToMap(formData) {
 }
 // Events
 
-const addNote = (note) => {
-    note = note || dummyNote;
-    if (note.id === undefined || note.id === null) note.id = notes.length
-    note.createdAt = note.createdAt || tmstmpToString(Date.now());
-    note.dates = note.dates || parseDates(note.content);
+const addNote = (note, container) => {
+        let collection = container === "archive" ? archive : notes;
 
-    // console.log("Adding Note", note);
-    const elem = document.createElement('div');
-    elem.className = "row item";
-    elem.innerHTML = `
+        note = note || dummyNote;
+        note.id = collection.length
+        note.createdAt = note.createdAt || tmstmpToString(Date.now());
+        note.dates = note.dates || parseDates(note.content);
+
+        // console.log("Adding Note", note);
+        const elem = document.createElement('div');
+        elem.className = "row item";
+        elem.innerHTML = `
         <div class="col-2 name">
             <img src="img/${getImgName(note.category)}" alt="">
             <p>${note.name}</p>
@@ -78,13 +80,19 @@ const addNote = (note) => {
             )
         }</div>
         <div class="col-2 controls">
-            <img src="img/edit.svg" alt="edit" onClick="createEditForm(${note.id})">
-            <img src="img/doc.svg" alt="archive" onClick="archiveNoteById(${note.id})">
-            <img src="img/delete.svg" alt="delete" onClick="deleteNoteById(${note.id})">
+            ${ container === "archive" ? "" : `<img src="img/edit.svg" alt="edit" onClick="createEditForm(${note.id})">`  }
+            <img src="img/doc.svg" alt="archive" onClick="toggleArchived(${note.id}, ${ container !== "archive" })">
+            ${ 
+                container === "archive" ? 
+                `<img src="img/delete.svg" alt="delete" onClick="deleteNoteById(${note.id}, 'archive')">` : 
+                `<img src="img/delete.svg" alt="delete" onClick="deleteNoteById(${note.id})">`
+            }
         </div>
     `;
-    tableHolder.appendChild(elem);
-    notes.push({...note });
+    let holder = container === "archive" ? archiveHolder : tableHolder;
+    holder.appendChild(elem);
+    collection.push({...note });
+    updateSummary();
 }
 
 const createEditForm = (id) => {
@@ -176,19 +184,25 @@ const editNote = (idx) => {
     `;
     form.replaceWith(domNote);
     notes[idx] = {...note };
-
+    updateSummary();
 }
 
-const archiveNoteById = (id) => {
-    const copy = deleteNoteById(id);
-    archive.push(copy);
+const toggleArchived = (id, isActive) => {
+    const containerFrom = isActive ? "main" : "archive";
+    const containerTo = isActive ? "archive" : "main";
+    
+    const copy = deleteNoteById(id, containerFrom);
+    addNote(copy, containerTo);
     console.log("Archive now: ", archive);
+    
 }
 
-const deleteNoteById = (id) => {
+const deleteNoteById = (id, container) => {
+    let collection = container === "archive" ? archive : notes;
+
     let idx = -1;
-    for (let i = 0; i < notes.length; i++) {
-        if (id === notes[i].id) {
+    for (let i = 0; i < collection.length; i++) {
+        if (id === collection[i].id) {
             idx = i;
             break;
         }
@@ -196,14 +210,18 @@ const deleteNoteById = (id) => {
 
     if (idx === -1) return;
 
+    let domId = "#table-container";
+    if (container === "archive") domId = "#archive-container";
+
     // delete visually
-    const domNote = document.querySelector(`#table-container .row:nth-child(${3 + idx})`);
+    const domNote = document.querySelector(`${domId} .row:nth-child(${3 + idx})`);
     console.log(`Note with id = ${id} was successfully deleted.`);
     domNote.remove();
 
     // delete in storage
-    let copy = {...notes[idx] };
-    notes.splice(idx, 1);
+    let copy = {...collection[idx] };
+    collection.splice(idx, 1);
+    
     return copy
 }
 
@@ -243,68 +261,67 @@ const createForm = () => {
     `;
     tableHolder.appendChild(elem);
     document.getElementById("add-btn").hidden = true;
+};
+
+const updateSummary = () => {
+    const container = summaryHolder;
+    const dict = Object.fromEntries(CATEGORY.map((item) => [item, 0]));
+
+    const summary = {
+        active: {...dict},
+        archive: {...dict},
+    };
+
+    notes.forEach( (item) => {
+        summary.active[item.category]++;
+    });
+    archive.forEach( (item) => {
+        summary.archive[item.category]++;
+    })
+
+    container.innerHTML = `
+    <h1 id="table-heading">My Summary</h1>
+    <div class="row header">
+        <div class="col-1"></div>
+        <div class="col-2">Category</div>
+        <div class="col-4">Active</div>
+        <div class="col-4">Archived</div>
+    </div>`;
+
+    CATEGORY.forEach(cat => {
+        let activeSummary = document.createElement("div");
+        activeSummary.className = "row item";
+        activeSummary.innerHTML = `
+            <div class="col-1"></div>
+            <div class="col-2">${getCategoryName(cat)}</div>
+            <div class="col-4">${summary.active[cat]}</div>
+            <div class="col-4">${summary.archive[cat]}</div>
+        `;
+        container.appendChild(activeSummary);
+    });
+    
+    
 }
 
 // UI
 const btnAddNew = document.getElementById("add-btn").addEventListener("click", createForm);
 
 const tableHolder = document.getElementById("table-container");
+const archiveHolder = document.getElementById("archive-container");
+const summaryHolder = document.getElementById("summary-container");
 
 // Data
 
-let startingNotes = [{
-        "id": 0,
-        "name": "ullamco dolore",
-        "createdAt": "05/09/2014",
-        "category": "task",
-        "content": "Aute tempor labore deserunt labore ad. Fugiat irure velit ullamco nostrud nostrud. Fugiat Lorem ex qui elit commodo irure consectetur ea. Aliqua deserunt tempor et consequat dolor veniam enim et minim. Exercitation excepteur est duis incididunt consectetur. Nostrud fugiat nisi ipsum ea officia ullamco elit labore ad sit anim non. Sit dolor cillum ipsum nostrud cupidatat pariatur elit voluptate.\r\n",
-        "dates": ["28/02/2014"]
-    },
-    {
-        "id": 1,
-        "name": "sunt anim",
-        "createdAt": "22/12/2015",
-        "category": "random",
-        "content": "Id velit amet deserunt est sit amet reprehenderit commodo ullamco ullamco Lorem velit aute quis. Aliqua nulla irure et laborum dolore eu culpa pariatur nulla ut pariatur ipsum et aliquip. Sit non minim culpa est. Commodo ad qui nulla eiusmod laborum.\r\n",
-        "dates": ["09/12/2017"]
-    },
-    {
-        "id": 2,
-        "name": "mollit eiusmod",
-        "createdAt": "11/09/2017",
-        "category": "random",
-        "content": "Fugiat elit consequat elit enim aliqua ex adipisicing consectetur exercitation ad sunt exercitation. Ea magna commodo eu reprehenderit eu magna officia. Laborum mollit consequat dolor mollit duis. Quis laboris cillum dolor eiusmod sint dolore ea qui incididunt tempor.\r\n",
-        "dates": ["14/02/2018"]
-    },
-    {
-        "id": 3,
-        "name": "irure laboris",
-        "createdAt": "21/09/2018",
-        "category": "random",
-        "content": "Id aliqua aliquip culpa eiusmod excepteur. Sunt officia exercitation consectetur ex. Cupidatat duis sunt labore quis dolor adipisicing esse qui commodo ex aliqua cupidatat est. Dolore culpa irure tempor id minim ex veniam. Culpa aute aliquip fugiat enim duis.\r\n",
-        "dates": ["28/02/2016"]
-    },
-    {
-        "id": 4,
-        "name": "eu veniam",
-        "createdAt": "28/06/2019",
-        "category": "random",
-        "content": "Ad consequat dolore elit nulla laborum et. Occaecat aliqua eiusmod veniam excepteur do id deserunt duis officia. Quis commodo qui proident anim magna laboris adipisicing occaecat eu laborum laborum labore dolor eiusmod. Ullamco eu eiusmod ea mollit sunt et commodo do sunt aute ipsum tempor. Cillum non velit eiusmod elit incididunt consectetur do id dolore ad. Ad pariatur incididunt est elit esse. Minim veniam in consequat enim nostrud laborum laboris esse.\r\n",
-        "dates": ["22/11/2018"]
-    },
-    {
-        "id": 5,
-        "name": "anim exercitation",
-        "createdAt": "14/12/2020",
-        "category": "idea",
-        "content": "Ad reprehenderit esse commodo nostrud veniam elit nisi labore magna ad sint. Est proident aliqua reprehenderit cillum nulla nulla. Est fugiat reprehenderit tempor aliqua nostrud.\r\n",
-        "dates": ["10/02/2017"]
-    }
-];
+const CATEGORY = ["task", "random", "idea"];
 
 let notes = [];
 let archive = []
 
+// Init
 startingNotes.forEach(elem => {
     addNote(elem);
 });
+startingArchive.forEach(elem => {
+    addNote(elem, "archive");
+})
+updateSummary();
