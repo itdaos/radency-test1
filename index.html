@@ -14,7 +14,7 @@
 <body>
 
 
-    <div id="table-container" class="container-md">
+    <div id="table-container" class="container-md table-main">
         <h1 id="table-heading">My notes</h1>
         <div class="row header">
             <div class="col-2">
@@ -28,14 +28,38 @@
         </div>
     </div>
 
-    <div class="container-md">
+    <div class="container-md table-main">
         <div class="row">
             <input id="add-btn" type="button" value="">
         </div>
     </div>
-    <div class="container-md"></div>
 
+    <div id="archive-container" class="container-md table-main">
+        <h1 id="table-heading">My Archive</h1>
+        <div class="row header">
+            <div class="col-2">
+                <p>Name</p>
+            </div>
+            <div class="col-1">Created On</div>
+            <div class="col-2">Category</div>
+            <div class="col-4">Content</div>
+            <div class="col-1">Dates</div>
+            <div class="col-2"></div>
+        </div>
+    </div>
 
+    <div id="summary-container" class="container-md table-main">
+        <h1 id="table-heading">My Summary</h1>
+        <div class="row header">
+            <div class="col-1"></div>
+            <div class="col-2">Category</div>
+            <div class="col-4">Active</div>
+            <div class="col-4">Archived</div>
+        </div>
+    </div>
+
+    <script src="data/notes.js">
+    </script>
     <script src="index.js">
     </script>
 </body>
