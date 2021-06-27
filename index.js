@@ -92,6 +92,7 @@ const addNote = (note, container) => {
     let holder = container === "archive" ? archiveHolder : tableHolder;
     holder.appendChild(elem);
     collection.push({...note });
+    updateSummary();
 }
 
 const createEditForm = (id) => {
@@ -183,20 +184,7 @@ const editNote = (idx) => {
     `;
     form.replaceWith(domNote);
     notes[idx] = {...note };
-
-}
-
-const archiveNoteById = (id) => {
-    const copy = deleteNoteById(id);
-    addNote(copy, "archive");
-    console.log("Archive now: ", archive);
-    
-}
-
-const unarchiveNoteById = (id) => {
-    const copy = deleteNoteById(id, "archive");
-    addNote(copy);
-    console.log("Archive now: ", archive);  
+    updateSummary();
 }
 
 const toggleArchived = (id, isActive) => {
@@ -205,7 +193,8 @@ const toggleArchived = (id, isActive) => {
     
     const copy = deleteNoteById(id, containerFrom);
     addNote(copy, containerTo);
-    console.log("Archive now: ", archive); 
+    console.log("Archive now: ", archive);
+    
 }
 
 const deleteNoteById = (id, container) => {
@@ -232,6 +221,7 @@ const deleteNoteById = (id, container) => {
     // delete in storage
     let copy = {...collection[idx] };
     collection.splice(idx, 1);
+    
     return copy
 }
 
@@ -271,6 +261,46 @@ const createForm = () => {
     `;
     tableHolder.appendChild(elem);
     document.getElementById("add-btn").hidden = true;
+};
+
+const updateSummary = () => {
+    const container = summaryHolder;
+    const dict = Object.fromEntries(CATEGORY.map((item) => [item, 0]));
+
+    const summary = {
+        active: {...dict},
+        archive: {...dict},
+    };
+
+    notes.forEach( (item) => {
+        summary.active[item.category]++;
+    });
+    archive.forEach( (item) => {
+        summary.archive[item.category]++;
+    })
+
+    container.innerHTML = `
+    <h1 id="table-heading">My Summary</h1>
+    <div class="row header">
+        <div class="col-1"></div>
+        <div class="col-2">Category</div>
+        <div class="col-4">Active</div>
+        <div class="col-4">Archived</div>
+    </div>`;
+
+    CATEGORY.forEach(cat => {
+        let activeSummary = document.createElement("div");
+        activeSummary.className = "row item";
+        activeSummary.innerHTML = `
+            <div class="col-1"></div>
+            <div class="col-2">${getCategoryName(cat)}</div>
+            <div class="col-4">${summary.active[cat]}</div>
+            <div class="col-4">${summary.archive[cat]}</div>
+        `;
+        container.appendChild(activeSummary);
+    });
+    
+    
 }
 
 // UI
@@ -282,6 +312,8 @@ const summaryHolder = document.getElementById("summary-container");
 
 // Data
 
+const CATEGORY = ["task", "random", "idea"];
+
 let notes = [];
 let archive = []
 
@@ -292,3 +324,4 @@ startingNotes.forEach(elem => {
 startingArchive.forEach(elem => {
     addNote(elem, "archive");
 })
+updateSummary();
